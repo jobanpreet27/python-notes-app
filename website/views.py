@@ -18,3 +18,16 @@ def home():
             flash('Note Saved', category="success")
 
     return render_template("home.html", user=current_user)
+
+@views.route('/delete-note',methods=['DELETE'])
+@login_required
+def delete_note():
+    note = json.loads(request.data)
+    note_id = note['noteId']
+    note = Note.query.get(note_id)
+    if note:
+        if note.user_id == current_user.id:
+            db.session.delete(note)
+            db.session.commit()
+
+    return jsonify({})
