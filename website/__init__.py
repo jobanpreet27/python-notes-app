@@ -9,8 +9,9 @@ DB_NAME = "database.db"
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = environ.get('SECRET_KEY') 
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    app.config['SECRET_KEY'] = environ.get('SECRET_KEY')
+    postgres_url = environ.get('DATABASE_URL')
+    app.config['SQLALCHEMY_DATABASE_URI'] = fix_url(postgres_url)
     db.init_app(app)
 
     from .views import views
@@ -34,9 +35,12 @@ def create_app():
     return app
 
 def create_database(app):
-    if not path.exists('website/'+DB_NAME):
         try:
             db.create_all(app=app)
             print('Created Database!')
         except:
             print("Exception occured")
+def fix_url(url):
+    if "postgres://" in url:
+        url = url.replace("postgres://","postgresql://")
+    return url
